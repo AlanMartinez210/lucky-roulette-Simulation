@@ -14,7 +14,7 @@
         }
 
         h1 {
-            font-size: 1.5em;
+            font-size: 1.2em;
             color: #333;
             margin-top: 24px;
             margin-bottom: 8px;
@@ -89,14 +89,11 @@
 
 <body>
     <header>
-        <h1>幸運ルーレットシミュレータ</h1>
-        <p>v1.0.0 by natama</p>
+        <h1>幸運ルーレットシミュレータ(非公式)</h1>
+        <p>v1.0.1 by natama</p>
         <p class="sub-text">不具合などありましたらXのDMまでお願いします。</br><a href="https://x.com/ioip2workx" target="_blank">コチラ</a></p>
     </header>
     <main>
-        <div id="ayaAmount">所持彩珀: 0 個</div>
-        <div>合計課金額: <span id="totalSpent">0</span> 円</div>
-
         <h2>課金</h2>
         <div class="button-group">
             <button id="buy15000">¥15,000（6480彩珀）</button>
@@ -108,7 +105,6 @@
         </div>
         <span class="sub-text">※ボタンをクリックすると彩珀を獲得します。</span>
 
-
         <h2>ガチャ(天井カウント: <span id="pityCounterText">0</span> / 160)</h2>
         <div class="button-group">
             <button id="gachaButton">1回</button>
@@ -116,6 +112,8 @@
         </div>
 
         <h2>結果</h2>
+        <div id="ayaAmount">所持彩珀: 0 個</div>
+        <div>合計課金額: <span id="totalSpent">0</span> 円</div>
         <div>きらめく心の合計: <span id="kiramekuCount">0</span> 個</div>
         <div id="result">ここに結果が表示されます。</div>
 
