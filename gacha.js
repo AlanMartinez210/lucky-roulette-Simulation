@@ -1,7 +1,21 @@
 'use strict';
 
 // ガチャのアイテムと確率の一覧
-const gachaPool = [
+const PITY_LIMIT = 160; // 天井
+const GACHA_COST = 120; // 1回のガチャに必要な彩珀
+let gachaPool = [];
+let pityCounter = 0;
+let saihakuAmount = 0; // 所持彩珀
+let totalSpent = 0; // 合計課金額
+let kiramekuCount = 0; // きらめく心の合計
+
+const kiramekuGachaPool = [
+    { name: 'きらめく心 ×3', probability: 0.0002, val: { きらめく心: 3 }, img: 'img/kirameku3.png' },
+    { name: 'きらめく心 ×2', probability: 0.0004, val: { きらめく心: 2 }, img: 'img/kirameku2.png' },
+    { name: 'きらめく心 ×1', probability: 0.0058, val: { きらめく心: 1 }, img: 'img/kirameku1.png' },
+];
+
+const nomalGachaPool = [
     { name: 'きらめく心 ×3', probability: 0.0002, type: 'レア', val: { きらめく心: 3 }, img: 'img/kirameku3.png' },
     { name: '彩珀 ×12000', probability: 0.0002, type: 'レア', val: { 彩珀: 12000 }, img: 'img/aya12000.png' },
     { name: 'きらめく心 ×2', probability: 0.0004, type: 'レア', val: { きらめく心: 2 }, img: 'img/kirameku2.png' },
@@ -20,77 +34,83 @@ const gachaPool = [
     { name: '彩珀 ×120', probability: 0.1668, type: '通常', val: { 彩珀: 120 }, img: 'img/aya120.png' },
 ];
 
-const pityLimit = 160; // 天井
-let pityCounter = 0;
-let aya = 0; // 所持彩珀
-let totalSpent = 0; // 合計課金額
-let kiramekuCount = 0; // きらめく心の合計
+
+// ガチャカウント用のテキスト要素
 const pityCounterText = document.getElementById('pityCounterText');
 
 function drawGacha() {
-    aya -= 120;
 
-    // この回が160回目なら、きらめく心を引く
-    if (pityCounter >= pityLimit) {
-        // この処理に入った場合天井をリセットする。
-        pityCounter = 0;
-        pityCounterText.innerText = pityCounter;
-        const kiramekuPool = [
-            { name: 'きらめく心 ×3', probability: 0.0002, val: { きらめく心: 3 }, img: 'img/kirameku3.png' },
-            { name: 'きらめく心 ×2', probability: 0.0004, val: { きらめく心: 2 }, img: 'img/kirameku2.png' },
-            { name: 'きらめく心 ×1', probability: 0.0058, val: { きらめく心: 1 }, img: 'img/kirameku1.png' },
-        ];
+    // 1回のガチャに必要な彩珀を減算
+    saihakuAmount -= GACHA_COST;
 
-        const total = kiramekuPool.reduce((sum, item) => sum + item.probability, 0);
-        const rnd2 = Math.random() * total;
-        let acc2 = 0;
-        for (const item of kiramekuPool) {
-            acc2 += item.probability;
-            if (rnd2 < acc2) {
+    // この回が160回目なら、きらめく心のガチャプールを使用する。
+    const gachaPool = pityCounter === PITY_LIMIT ? kiramekuGachaPool : nomalGachaPool;
+
+    const totalWeight = gachaPool.reduce((sum, item) => sum + item.probability, 0);
+
+    const rnd = Math.random() * totalWeight;
+    let acc = 0;
+    let selectedItems = [];
+
+    for (let item of gachaPool) {
+        acc += item.probability;
+        if (rnd < acc) {
+
+            selectedItems.push(item);
+
+            // 同じprobabilityが存在する場合、gachaPoolから同じprobabilityのアイテムを取得する。
+            // 取得したものはselectedItemsに追加する。
+            const remainingItems = gachaPool.slice(gachaPool.indexOf(item) + 1);
+            for (const next of remainingItems) {
+                if (next.probability === item.probability) {
+                    selectedItems.push(next);
+                } else {
+                    break;
+                }
+            }
+
+            if (selectedItems.length > 1) {
+                // 確率が同じアイテムが複数ある場合、ランダムに選択
+                const randomIndex = Math.floor(Math.random() * selectedItems.length);
+                item = selectedItems[randomIndex];
+            }
+
+            // もしきらめく心が出たら、pityCounterをリセット
+            if (item.name.startsWith('きらめく心')) {
                 kiramekuCount += item.val['きらめく心'];
                 updateKiramekuCountDisplay();
-                return item;
+                pityCounter = 0;
+            } else {
+                pityCounter++;
             }
-        }
-    } else {
-        const rnd = Math.random();
-        let acc = 0;
 
-        for (const item of gachaPool) {
-            acc += item.probability;
-            if (rnd < acc) {
-                // もし当たりが出たら、pityCounterをリセット
-                if (item.name.startsWith('きらめく心')) {
-                    kiramekuCount += item.val['きらめく心'];
-                    updateKiramekuCountDisplay();
-                    pityCounter = 0;
-                } else {
-                    pityCounter++;
-                }
+            pityCounterText.innerText = pityCounter;
 
-                pityCounterText.innerText = pityCounter;
-
-                // もし彩珀が出たら、所持彩珀に加算
-                if (item.val && item.val['彩珀']) {
-                    aya += item.val['彩珀'];
-                }
-
-                // 引いたアイテムを返す
-                return item;
+            // もし彩珀が出たら、所持彩珀に加算
+            if (item.val && item.val['彩珀']) {
+                saihakuAmount += item.val['彩珀'];
             }
+
+            // 引いたアイテムを返す
+            return item;
         }
     }
 
-    return { name: 'ハズレ (内部エラー)', val: {}, img: '' };
+    return {
+        name: 'ハズレ (内部エラー)',
+        val: {},
+        img: ''
+    };
+
 }
 
-function addAya(amount) {
-    aya += amount;
-    updateAyaDisplay();
+function addSaihakuAmount(amount) {
+    saihakuAmount += amount;
+    updateSaihakuDisplay();
 }
 
-function updateAyaDisplay() {
-    document.getElementById('ayaAmount').innerText = `所持彩珀: ${aya} 個`;
+function updateSaihakuDisplay() {
+    document.getElementById('saihakuAmount').innerText = saihakuAmount;
 }
 
 // kiramekuCountの表示を更新する関数
@@ -122,19 +142,19 @@ function renderResultItem(item) {
 // 単発ガチャ
 const resultDiv = document.getElementById('result');
 document.getElementById('gachaButton').addEventListener('click', () => {
-    if (aya < 120) {
+    if (saihakuAmount < 120) {
         alert('彩珀が不足しています（1回回すには120彩珀必要）');
         return;
     }
     resultDiv.innerHTML = '';
     const result = drawGacha();
     resultDiv.appendChild(renderResultItem(result));
-    updateAyaDisplay();
+    updateSaihakuDisplay();
 });
 
 // 10連ガチャ
 document.getElementById('gacha10Button').addEventListener('click', () => {
-    if (aya < 1200) {
+    if (saihakuAmount < 1200) {
         alert('彩珀が不足しています（10回回すには1200彩珀必要）');
         return;
     }
@@ -144,7 +164,7 @@ document.getElementById('gacha10Button').addEventListener('click', () => {
         const res = drawGacha();
         resultDiv.appendChild(renderResultItem(res));
     }
-    updateAyaDisplay();
+    updateSaihakuDisplay();
 });
 
 // 課金ボタン設定（HTMLに対応するIDを用意）
@@ -168,9 +188,9 @@ const priceMap = {
 };
 
 // 課金ボタンにイベントリスナーを追加
-for (const [id, ayaAmount] of Object.entries(purchaseOptions)) {
+for (const [id, saihakuAmount] of Object.entries(purchaseOptions)) {
     document.getElementById(id).addEventListener('click', () => {
-        addAya(ayaAmount);
+        addSaihakuAmount(saihakuAmount);
 
         // 合計課金額を更新
         const price = priceMap[id];
