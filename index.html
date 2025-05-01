@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Roulette Simulation</title>
+    <title>ツリネバ：幸運ルーレットシミュレータ</title>
     <style>
         /* Reset some default styles */
         body,
@@ -62,6 +62,21 @@
             padding: 16px;
         }
 
+        .sub-text {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .caution-text {
+            font-size: 0.9em;
+            color: #d9534f;
+            margin-top: 20px;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
         #result {
             white-space: pre-line;
             margin-top: 12px;
@@ -76,6 +91,7 @@
     <header>
         <h1>幸運ルーレットシミュレータ</h1>
         <p>v1.0.0 by natama</p>
+        <p class="sub-text">不具合などありましたらXのDMまでお願いします。</br><a href="https://x.com/ioip2workx" target="_blank">コチラ</a></p>
     </header>
     <main>
         <div id="ayaAmount">所持彩珀: 0 個</div>
@@ -90,7 +106,7 @@
             <button id="buy800">¥800（300彩珀）</button>
             <button id="buy160">¥160（60彩珀）</button>
         </div>
-        <span>※ボタンをクリックすると彩珀を獲得します。</span>
+        <span class="sub-text">※ボタンをクリックすると彩珀を獲得します。</span>
 
 
         <h2>ガチャ(天井カウント: <span id="pityCounterText">0</span> / 160)</h2>
@@ -102,7 +118,16 @@
         <h2>結果</h2>
         <div>きらめく心の合計: <span id="kiramekuCount">0</span> 個</div>
         <div id="result">ここに結果が表示されます。</div>
+
+        <div class="caution-text">
+            <h3>【!】注意</h3>
+            <p>・このシミュレータは非公式です。</p>
+            <p>・このシミュレータは、実際のガチャの結果を保証するものではありません。</p>
+            <p>・ガチャの結果はランダムであり、実際のゲーム内での結果とは異なる場合があります。</p>
+            <p>・このシミュレータは、予告なく使用できなくなる場合があります。</p>
+        </div>
     </main>
+
     <script src="gacha.min.js"></script>
 </body>
 
