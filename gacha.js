@@ -1,5 +1,6 @@
 'use strict';
 
+
 // ガチャのアイテムと確率の一覧
 const PITY_LIMIT = 160; // 天井
 const GACHA_COST = 120; // 1回のガチャに必要な彩珀
@@ -8,11 +9,19 @@ let pityCounter = 0;
 let saihakuAmount = 0; // 所持彩珀
 let totalSpent = 0; // 合計課金額
 let kiramekuCount = 0; // きらめく心の合計
+let totalCount = 0; // ガチャの総回数
+let is3KuramekuFlg = false;
+
+const saihakuGachaPool = [
+    { name: '彩珀 ×12000', probability: 0.0909, type: 'レア', val: { 彩珀: 12000 }, img: 'img/aya12000.png' },
+    { name: '彩珀 ×6000', probability: 0.181818, type: 'レア', val: { 彩珀: 6000 }, img: 'img/aya6000.png' },
+    { name: '彩珀 ×3000', probability: 0.727273, type: 'レア', val: { 彩珀: 3000 }, img: 'img/aya3000.png' },
+];
 
 const kiramekuGachaPool = [
-    { name: 'きらめく心 ×3', probability: 0.0002, val: { きらめく心: 3 }, img: 'img/kirameku3.png' },
-    { name: 'きらめく心 ×2', probability: 0.0004, val: { きらめく心: 2 }, img: 'img/kirameku2.png' },
-    { name: 'きらめく心 ×1', probability: 0.0058, val: { きらめく心: 1 }, img: 'img/kirameku1.png' },
+    { name: 'きらめく心 ×3', probability: 0.031250, val: { きらめく心: 3 }, img: 'img/kirameku3.png' },
+    { name: 'きらめく心 ×2', probability: 0.062500, val: { きらめく心: 2 }, img: 'img/kirameku2.png' },
+    { name: 'きらめく心 ×1', probability: 0.906250, val: { きらめく心: 1 }, img: 'img/kirameku1.png' },
 ];
 
 const nomalGachaPool = [
@@ -43,8 +52,32 @@ function drawGacha() {
     // 1回のガチャに必要な彩珀を減算
     saihakuAmount -= GACHA_COST;
 
+    // 総回数のカウントと、総回数イベントの実施
+    totalCount++;
+    updateTotalCountDisplay();
+    totalCountEvent();
+
+
+    // 総回数イベント
+    let gachaPool;
+    switch (totalCount) {
+        case 301:
+            toastr.info('猫の神の祝福が発動しました！');
+            gachaPool = saihakuGachaPool;
+            break;
+        case 800:
+            // 800回回したので、次回のきらめく心を引くと確定で3個になるフラグをONにする。
+            toastr.info('煌めきの祝福が発動、次回のきらめく心は3個確定です！');
+            is3KuramekuFlg = true;
+            break;
+        default:
+            // 通常のガチャプールを使用
+            gachaPool = nomalGachaPool;
+            break;
+    }
+
     // この回が160回目なら、きらめく心のガチャプールを使用する。
-    const gachaPool = pityCounter === PITY_LIMIT ? kiramekuGachaPool : nomalGachaPool;
+    if (pityCounter === PITY_LIMIT) gachaPool = kiramekuGachaPool;
 
     const totalWeight = gachaPool.reduce((sum, item) => sum + item.probability, 0);
 
@@ -77,7 +110,19 @@ function drawGacha() {
 
             // もしきらめく心が出たら、pityCounterをリセット
             if (item.name.startsWith('きらめく心')) {
-                kiramekuCount += item.val['きらめく心'];
+
+                if (is3KuramekuFlg) {
+                    kiramekuCount += 3;
+                    toastr.success(`祝福効果：きらめく心を3個獲得しました！`);
+
+                    // アイテムを上書きして表示する
+                    item = { name: 'きらめく心 ×3', probability: 0.0002, type: 'レア', val: { きらめく心: 3 }, img: 'img/kirameku3.png' };
+                    is3KuramekuFlg = false; // 3個確定フラグをリセット
+                } else {
+                    kiramekuCount += item.val['きらめく心'];
+                    toastr.success(`きらめく心を${item.val['きらめく心']}個獲得しました！`);
+                }
+
                 updateKiramekuCountDisplay();
                 pityCounter = 0;
             } else {
@@ -116,6 +161,44 @@ function updateSaihakuDisplay() {
 // kiramekuCountの表示を更新する関数
 function updateKiramekuCountDisplay() {
     document.getElementById('kiramekuCount').innerText = kiramekuCount;
+}
+
+function updateTotalCountDisplay() {
+    document.getElementById('totalCount').innerText = totalCount;
+}
+
+// ガチャの総回数によるイベント
+function totalCountEvent() {
+
+    switch (totalCount) {
+        case 3:
+            addSaihakuAmount(300);
+            toastr.info('3回報酬：300彩珀を獲得しました！');
+            break;
+        case 20:
+            addSaihakuAmount(300);
+            toastr.info('20回報酬：300彩珀を獲得しました！');
+            break;
+        case 55:
+            addSaihakuAmount(600);
+            toastr.info('55回報酬：600彩珀を獲得しました！');
+            break;
+        case 110:
+            addSaihakuAmount(600);
+            toastr.info('110回報酬：600彩珀を獲得しました！');
+            break;
+        case 180:
+            addSaihakuAmount(800);
+            toastr.info('180回報酬：800彩珀を獲得しました！');
+            break;
+        case 260:
+            addSaihakuAmount(900);
+            toastr.info('260回報酬：900彩珀を獲得しました！');
+            break;
+        default:
+            // 何もしない
+            break;
+    }
 }
 
 function renderResultItem(item) {
@@ -177,6 +260,15 @@ const purchaseOptions = {
     buy160: 60,
 };
 
+// 幸運応援ボタン設定
+const luckSupportOptions = {
+    add9600: 9600,
+    add4800: 4800,
+    add2400: 2400,
+    add1200: 1200,
+    add600: 600,
+};
+
 // 課金ボタンを押したときに合計課金額を更新
 const priceMap = {
     buy15000: 15000,
@@ -187,6 +279,15 @@ const priceMap = {
     buy160: 160,
 };
 
+// 幸運応援ボタンを押したときに合計課金額を更新
+const luckPriceMap = {
+    add9600: 15000,
+    add4800: 8000,
+    add2400: 3200,
+    add1200: 1600,
+    add600: 800,
+};
+
 // 課金ボタンにイベントリスナーを追加
 for (const [id, saihakuAmount] of Object.entries(purchaseOptions)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -194,6 +295,26 @@ for (const [id, saihakuAmount] of Object.entries(purchaseOptions)) {
 
         // 合計課金額を更新
         const price = priceMap[id];
+        totalSpent += price;
+        // 合計課金額の表示を更新
+        const totalSpentSpan = document.getElementById('totalSpent');
+        totalSpentSpan.innerText = totalSpent.toLocaleString();
+    });
+}
+
+// 幸運応援ボタンにイベントリスナーを追加
+for (const [id, saihakuAmount] of Object.entries(luckSupportOptions)) {
+    document.getElementById(id).addEventListener('click', () => {
+
+        // 自身を押せなくする。
+        document.getElementById(id).disabled = true;
+        // ボタンの色を変える
+        document.getElementById(id).style.backgroundColor = '#ccc';
+
+        addSaihakuAmount(saihakuAmount);
+
+        // 合計課金額を更新
+        const price = luckPriceMap[id];
         totalSpent += price;
         // 合計課金額の表示を更新
         const totalSpentSpan = document.getElementById('totalSpent');

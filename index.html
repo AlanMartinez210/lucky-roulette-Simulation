@@ -85,6 +85,8 @@
             background: #f9f9f9;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N31R9VKPBB"></script>
     <script>
@@ -94,16 +96,32 @@
 
         gtag('config', 'G-N31R9VKPBB');
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- トーストCDN -->
+
 </head>
 
 <body>
     <header>
         <h1>幸運ルーレットシミュレータ(非公式)</h1>
-        <p>v1.1.0 by natama</p>
+        <p>v1.2.0 by natama</p>
         <p class="sub-text">不具合などありましたらXのDMまでお願いします。</br><a href="https://x.com/ioip2workx" target="_blank">コチラ</a></p>
     </header>
     <main>
         <h2>課金</h2>
+
+        <h3>幸運応援</h3>
+        <div class="button-group">
+            <button id="add9600">¥15,000（80回分）</button>
+            <button id="add4800">¥8,000（40回分）</button>
+            <button id="add2400">¥3,200（20回分）</button>
+            <button id="add1200">¥1,600（10回分）</button>
+            <button id="add600">¥800（5回分）</button>
+        </div>
+        <span class="sub-text">※回数分の彩珀に変換されます。</span>
+
+        <h3>彩珀</h3>
         <div class="button-group">
             <button id="buy15000">¥15,000（6480彩珀）</button>
             <button id="buy8000">¥8,000（3280彩珀）</button>
@@ -120,11 +138,24 @@
             <button id="gacha10Button">10回</button>
         </div>
 
-        <h2>結果</h2>
+        <h2>結果（総ガチャ回数：<span id="totalCount">0</span>）回</h2>
         <div>所持彩珀: <span id="saihakuAmount">0</span> 個</div>
         <div>合計課金額: <span id="totalSpent">0</span> 円</div>
         <div>きらめく心の合計: <span id="kiramekuCount">0</span> 個</div>
         <div id="result">ここに結果が表示されます。</div>
+
+        <h2>回数報酬</h2>
+        <div>
+            <p>3回：300彩珀</p>
+            <p>20回：300彩珀</p>
+            <p>55回：600彩珀</p>
+            <p>110回：600彩珀</p>
+            <p>180回：800彩珀</p>
+            <p>260回：900彩珀</p>
+            <p>300回(猫の神の祝福)：<br />彩珀3000 or 6000 or 12000</p>
+            <p>800回(煌めきの祝福)：<br />次回きらめきの心を引くと3個確定</p>
+        </div>
+        <span class="sub-text">※回数に応じて自動的に所持彩珀に加算されます。</span>
 
         <div class="caution-text">
             <h3>【!】注意</h3>
